@@ -2,7 +2,6 @@
     box-sizing: border-box;
 }
 
-
 #pokemon {
     display: flex;
     flex-wrap: wrap;
@@ -31,7 +30,6 @@
     background-color: rgb(0, 221, 255) !important;
     border: px solid rgb(0, 221, 255) !important;
   }
-  
   
   #pokemonTypes {
     display: flex;

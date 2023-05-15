@@ -35,20 +35,6 @@ const getPokemons = async () => {
     return pokemonsResult
 }
 
-const loadPokemon = async () => {
-    const res = await axios.get('https://pokeapi.co/api/v2/pokemon?limit=810')
-    let pokemons = res.data.results
-    pokemons.forEach(async (pokemon) => {
-        const res = await axios.get(pokemon.url)
-        let pokemonTypes = []
-        res.data.types.forEach((type) => {
-            pokemonTypes.push(type.type.name)
-        })
-        pokemon.types = pokemonTypes
-    })
-    return pokemons
-}
-
 const setup = async () => {
     pokemonTypes = await getPokemonTypes()
     displayPokemonTypes(pokemonTypes)
@@ -75,8 +61,6 @@ const setup = async () => {
         if (selectedTypes.length == 1) {
             let selected_pokemons = []
             totalPokemons.forEach((pokemon) => {
-
-
                 if (pokemon.types.includes(selectedTypes[0])) {
                     selected_pokemons.push(pokemon)
                     console.log(selected_pokemons.length)
@@ -99,6 +83,8 @@ const setup = async () => {
         else {
             pokemon = totalPokemons
         }
+        console.log('selectedtypes', selectedTypes.length)
+        console.log(pokemon.length)
         showPage(1, pokemon)
     })
 
@@ -123,13 +109,12 @@ const setup = async () => {
             <h3>Types</h3>
             <ul>${types.map((type) => `<li>${type}</li>`).join('')}</ul>
           `)
-        $(".modal-title").html(`<h2>${res.data.name}</h2>`)
+        $(".modal-title").html(`<h2>${res.data.name}</h2>
+                                <h2>${res.data.id}</h2>`)
     })
 
     $('body').on('click', '.pageBtn', async function (e) {
         const pageNum = parseInt($(this).attr('pageNum'))
-        console.log("parseint", $(this).attr('pageNum'))
-        console.log("pageNum: ", pageNum);
         showPage(pageNum, pokemon);
     });
 };
@@ -144,19 +129,18 @@ async function showPage(currentPage, pokemon) {
         currentPage = numPages;
     }
 
-    $('#pokemon').empty();
-    for (let i = ((currentPage - 1) * PAGE_SIZE); i < ((currentPage - 1) * PAGE_SIZE) + PAGE_SIZE && i < pokemon.length; i++) {
-        let innerResponse = await axios.get(`${pokemon[i].url}`);
-        let thisPokemon = innerResponse.data;
-
+    pokemons_to_display = pokemon.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
+    $('#pokemon').empty()
+    pokemons_to_display.forEach(async (pokemon) => {
+        const res = await axios.get(pokemon.url)
         $('#pokemon').append(`
-        <div class="pokeCard card" pokeName=${thisPokemon.name}>
-            <h3>${thisPokemon.name}</h3>
-            <img src="${thisPokemon.sprites.front_default}" alt="${thisPokemon.name}"/>
-            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#pokeModal">More</button>
+        <div class="pokeCard card" pokeName=${pokemon.name}>
+        <h3>${pokemon.name}</h3>
+        <img src="${res.data.sprites.front_default}" alt="${pokemon.name}"/>
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#pokeModal">More</button>
         </div>
-    `);
-    }
+        `)
+    })
 
     // add pagination buttons
     $('#pagination').empty();
@@ -202,6 +186,3 @@ async function showPage(currentPage, pokemon) {
 }
 
 $(document).ready(setup)
-
-
-
